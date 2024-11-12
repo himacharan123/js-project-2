@@ -1,0 +1,97 @@
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  font-size: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  background-color: #f0f0f5;
+}
+
+button {
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+}
+
+.board {
+  display: grid;
+  justify-content: center;
+  align-items: center;
+  width: 60vw;
+  gap: 20px;
+  text-align: center;
+}
+
+.header {
+  grid-column: 1 / -1;
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.players {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  gap: 8vw;
+}
+
+.playerCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.playerCard input {
+  font-size: 1rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  text-align: center;
+}
+
+.tile {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.gameTile {
+  width: 100px;
+  height: 100px;
+  background-color: lightgray;
+  font-size: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: box-shadow 0.3s ease;
+}
+
+.gameTile:hover {
+  box-shadow: 0 0 1rem black;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.restart {
+  font-size: 1rem;
+  padding: 0.75rem 1.5rem;
+}
+
+.restart:hover {
+  box-shadow: 0 0 1rem black;
+}
+
+#statusMessage {
+  font-size: 1.25rem;
+  color: #333;
+  margin-top: 20px;
+}
