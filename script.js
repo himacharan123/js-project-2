@@ -1,31 +1,27 @@
-
 let currentPlayer = 'X';
-let gameBoard = ['', '', '', '', '', '', '', '', '']; 
+let gameBoard = ['', '', '', '', '', '', '', '', ''];
 let isGameOver = false;
-
 
 function handleTileClick(tileIndex) {
     if (isGameOver || gameBoard[tileIndex]) return;
 
-  
+    // Update the game board and UI
     gameBoard[tileIndex] = currentPlayer;
     const tileElement = document.getElementById(`tile0${tileIndex + 1}`);
     tileElement.innerText = currentPlayer;
 
-  
     if (currentPlayer === 'X') {
         tileElement.style.color = 'blue';
-        tileElement.style.backgroundColor='white'
+        tileElement.style.backgroundColor = 'white';
     } else {
-        tileElement.style.color = 'red'; 
-         tileElement.style.backgroundColor='white'
+        tileElement.style.color = 'red';
+        tileElement.style.backgroundColor = 'white';
     }
-
 
     if (checkWinner()) {
         const player1Name = document.getElementById('player01').value || 'Player 1';
         const player2Name = document.getElementById('player02').value || 'Player 2';
-        
+
         if (currentPlayer === 'X') {
             document.getElementById('statusMessage').innerText = `${player1Name} wins!`;
         } else {
@@ -33,29 +29,28 @@ function handleTileClick(tileIndex) {
         }
         isGameOver = true;
     } else if (gameBoard.every(tile => tile)) {
-      
         document.getElementById('statusMessage').innerText = `It's a draw!`;
         isGameOver = true;
     } else {
-        
+        // Switch to the next player
         currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
         const player1Name = document.getElementById('player01').value || 'Player 1';
         const player2Name = document.getElementById('player02').value || 'Player 2';
-        
+
         document.getElementById('statusMessage').innerText = `Player ${currentPlayer === 'X' ? player1Name : player2Name}, make your move!`;
+
+        // Update probabilities
+        updateProbabilities();
     }
 }
 
-
 function checkWinner() {
-   
     const winningCombos = [
         [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
         [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
         [0, 4, 8], [2, 4, 6]             // Diagonals
     ];
 
-   
     return winningCombos.some(combo => {
         const [a, b, c] = combo;
         return gameBoard[a] && gameBoard[a] === gameBoard[b] && gameBoard[a] === gameBoard[c];
@@ -63,18 +58,97 @@ function checkWinner() {
 }
 
 function resetGame() {
+    // Reset the game state
     gameBoard = ['', '', '', '', '', '', '', '', ''];
     currentPlayer = 'X';
     isGameOver = false;
+
+    // Reset the UI
     document.getElementById('statusMessage').innerText = `Player 1, make your move!`;
 
-    // Clear each tile on the board
     for (let i = 1; i <= 9; i++) {
         const tileElement = document.getElementById(`tile0${i}`);
         tileElement.innerText = '';
-        tileElement.style.color = ''; 
+        tileElement.style.color = '';
+        tileElement.style.backgroundColor = '';
+    }
+
+    // Recalculate and update probabilities
+    updateProbabilities();
 }
+function updateProbabilities() {
+    const probabilities = calculateProbabilities(gameBoard, currentPlayer);
+    const xWinPercentage = (probabilities.xWin * 100).toFixed(2);
+    const oWinPercentage = (probabilities.oWin * 100).toFixed(2);
+    const drawPercentage = (probabilities.draw * 100).toFixed(2);
+
+    document.getElementById('statusMessage').innerHTML = `
+        <p>Player X Win %: ${xWinPercentage}%</p>
+        <p>Player O Win %: ${oWinPercentage}%</p>
+        <p>Draw %: ${drawPercentage}%</p>
+    `;
 }
+
+
+function calculateProbabilities(board, player) {
+    // Check if there's an immediate winner or draw
+    const winner = evaluateWinner(board);
+    if (winner === 'X') return { xWin: 1, oWin: 0, draw: 0 };
+    if (winner === 'O') return { xWin: 0, oWin: 1, draw: 0 };
+    if (board.every(tile => tile)) return { xWin: 0, oWin: 0, draw: 1 };
+
+    const availableMoves = getAvailableMoves(board);
+    if (availableMoves.length === 9) {
+        // Empty board, set default probabilities (e.g., equal chances for all)
+        return { xWin: 0.5, oWin: 0.5, draw: 0 };
+    }
+
+    let xWins = 0, oWins = 0, draws = 0;
+
+    for (const move of availableMoves) {
+        const newBoard = [...board];
+        newBoard[move] = player;
+
+        const nextPlayer = player === 'X' ? 'O' : 'X';
+        const results = calculateProbabilities(newBoard, nextPlayer);
+
+        xWins += results.xWin;
+        oWins += results.oWin;
+        draws += results.draw;
+    }
+
+    const totalOutcomes = availableMoves.length;
+    return {
+        xWin: xWins / totalOutcomes,
+        oWin: oWins / totalOutcomes,
+        draw: draws / totalOutcomes
+    };
+}
+
+
+function evaluateWinner(board) {
+    const winningCombos = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+        [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+        [0, 4, 8], [2, 4, 6]           
+    ];
+
+    for (const [a, b, c] of winningCombos) {
+        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+            return board[a]; // 'X' or 'O'
+        }
+    }
+    return null;
+}
+
+function getAvailableMoves(board) {
+    const moves = [];
+    for (let i = 0; i < board.length; i++) {
+        if (!board[i]) moves.push(i);
+    }
+    return moves;
+}
+
 // Add click event listeners to tiles
 for (let i = 0; i < 9; i++) {
     document.getElementById(`tile0${i + 1}`).addEventListener('click', () => handleTileClick(i));
